@@ -49,9 +49,8 @@ function buildPrestartText(dateISO: string, hits: Hit[], eventByName: Map<string
 export function setupDailyPost(params: {
   client: Client;
 
-  // 投稿先を分離
-  dailyChannelId: string;       // 09:00
-  prestartChannelId: string;    // 21:30
+  dailyChannelId: string;
+  prestartChannelId: string;
 
   events: EventDef[];
   eventByName: Map<string, EventDef>;
@@ -76,7 +75,8 @@ export function setupDailyPost(params: {
     { timezone: "Asia/Tokyo" }
   );
 
-  // 21:30 JST（開始前リマインド：prestart_remind_time が "21:30" のイベントだけ）
+  // 21:30 JST（前日リマインダー）
+  // TODO: ここはeventsのみで指定できるようにしたい...。
   cron.schedule(
     "0 30 21 * * *", // 21:30
     // "0 * * * * *", // TEST: every minute

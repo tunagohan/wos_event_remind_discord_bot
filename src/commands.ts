@@ -10,7 +10,6 @@ export const wosEventCommand = new SlashCommandBuilder()
     sub
       .setName("add")
       .setDescription("n日後のイベント（空白/休憩は除外）")
-      // 入力体験は /wos_event add 3 で運用できます（UI上は days オプション）
       .addIntegerOption((opt) =>
         opt
           .setName("days")

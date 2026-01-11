@@ -3,8 +3,8 @@ import { DateTime } from "luxon";
 export type PhaseKind = "active" | "rest" | "blank";
 
 export type EventLink = {
-  label: string; // 例: "コピペ用リンク"
-  url: string;   // Discordメッセージリンク
+  label: string;
+  url: string;
 };
 
 export type Phase = {
