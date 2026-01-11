@@ -2,5 +2,8 @@
   "stylelint.enable": false,
   "editor.codeActionsOnSave": {
     // 既存に他のfixがあるなら残しつつ、stylelintだけ消す
-  }
+  },
+  "cSpell.words": [
+    "PRESTART"
+  ]
 }

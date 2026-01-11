@@ -2,6 +2,11 @@ import { DateTime } from "luxon";
 
 export type PhaseKind = "active" | "rest" | "blank";
 
+export type EventLink = {
+  label: string; // 例: "コピペ用リンク"
+  url: string;   // Discordメッセージリンク
+};
+
 export type Phase = {
   name: string; // フェーズ名
   days: number; // 期間（日数）
@@ -10,11 +15,21 @@ export type Phase = {
 };
 
 export type EventDef = {
-  category: string; // カテゴリ
-  name: string;     // イベント名
-  start: string;    // イベント始点日
-  phases: Phase[];  // 周期
-  previous_remind?: boolean; // 前回通知フラグ
+  category: string;
+  name: string;
+  start: string;
+  phases: Phase[];
+
+  previous_remind?: boolean;
+
+  // 追加: 開始時刻（例: "22:00"）
+  start_time?: string;
+
+  // 追加: 開始前リマインドを飛ばす時刻（例: "21:30"）
+  prestart_remind_time?: string;
+
+  // 追加: コピペ用リンク等
+  links?: EventLink[];
 };
 
 export type Hit = {
@@ -27,6 +42,7 @@ export type Hit = {
 };
 
 const ZONE = "Asia/Tokyo";
+
 const mod = (n: number, m: number) => ((n % m) + m) % m;
 
 const cycleLength = (e: EventDef) => e.phases.reduce((acc, p) => acc + p.days, 0);
@@ -81,7 +97,10 @@ export function eventsOnDateActiveOnly(events: EventDef[], dateISO: string): Hit
   return hits;
 }
 
-export function formatBullets(hits: Hit[]): string {
+export function formatBullets(
+  hits: Hit[],
+  eventByName?: Map<string, EventDef>
+): string {
   const byCat = new Map<string, Hit[]>();
   for (const h of hits) {
     const arr = byCat.get(h.category) ?? [];
@@ -91,13 +110,31 @@ export function formatBullets(hits: Hit[]): string {
 
   const lines: string[] = [];
   for (const [cat, arr] of byCat) {
-    lines.push(`■ ${cat}`);
+    // h3（Discord見出し）
+    lines.push(`### ${cat}`);
+
     for (const h of arr) {
-      lines.push(`- ${h.name}：${h.phaseName}（${h.phaseDay}/${h.phaseDays}日目）`);
+      const def = eventByName?.get(h.name);
+
+      // 開始時刻があるイベントは、時刻を優先して表示（フェーズ表記は省略）
+      if (def?.start_time) {
+        lines.push(`- ${h.name}（${def.start_time}開始）`);
+      } else {
+        lines.push(`- ${h.name}：${h.phaseName}（${h.phaseDay}/${h.phaseDays}日目）`);
+      }
+
+      // コピペ用リンク（プレビュー抑止で <> で囲む）
+      if (def?.links && def.links.length > 0) {
+        for (const link of def.links) {
+          lines.push(`  - ${link.label}: <${link.url}>`);
+        }
+      }
     }
   }
+
   return lines.join("\n");
 }
+
 
 // 追加: ISO日付を基準に +n 日した ISO を返す
 export function plusDaysISO(baseISO: string, days: number): string {

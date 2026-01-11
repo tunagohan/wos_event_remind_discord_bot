@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { Client, GatewayIntentBits, Interaction } from "discord.js";
-import cron from "node-cron";
+import { setupDailyPost } from "./daily_post.js";
 
 import { EVENTS } from "./events.js";
 import {
@@ -10,8 +10,6 @@ import {
   formatDateJP,
   plusDaysISO,
 } from "./wos_schedule.js";
-
-import { setupDailyPost } from "./daily_post.js";
 
 const token = process.env.DISCORD_TOKEN;
 if (!token) throw new Error("Missing env: DISCORD_TOKEN");
@@ -48,7 +46,7 @@ function buildReply(dateISO: string, opts?: { includeDayBeforeReminder?: boolean
   }
 
   lines.push(`${formatDateJP(dateISO)} のイベント`);
-  lines.push(formatBullets(hits));
+  lines.push(formatBullets(hits, EVENT_BY_NAME));
   return lines.join("\n");
 }
 
@@ -82,15 +80,24 @@ client.on("interactionCreate", async (interaction: Interaction) => {
 client.once("ready", () => {
   console.log(`Logged in as ${client.user?.tag}`);
 
-  const channelId = process.env.DISCORD_POST_CHANNEL_ID;
-  if (!channelId) {
-    console.log("DISCORD_POST_CHANNEL_ID is not set. Daily post is disabled.");
+  const dailyChannelId = process.env.DISCORD_DAILY_CHANNEL_ID;
+  const prestartChannelId = process.env.DISCORD_PRESTART_CHANNEL_ID;
+
+  if (!dailyChannelId) {
+    console.log("DISCORD_DAILY_CHANNEL_ID is not set. Daily post is disabled.");
+    return;
+  }
+  if (!prestartChannelId) {
+    console.log("DISCORD_PRESTART_CHANNEL_ID is not set. Prestart post is disabled.");
     return;
   }
 
   setupDailyPost({
     client,
-    channelId,
+    dailyChannelId,
+    prestartChannelId,
+    events: EVENTS,
+    eventByName: EVENT_BY_NAME,
     buildReply,
   });
 });

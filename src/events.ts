@@ -2,6 +2,17 @@ import { EventDef } from "./wos_schedule";
 
 export const EVENTS: EventDef[] = [
   {
+    category: "常設イベント",
+    name: "熊罠",
+    start: "2026-01-12",
+    start_time: "22:00",
+    prestart_remind_time: "21:30",
+    phases: [
+      { name: "熊罠", days: 1, kind: "active" },
+      { name: "空白", days: 1, kind: "blank" }
+    ],
+  },
+  {
     category: "週間イベント",
     name: "最強王国(SvS)",
     start: "2025-10-04",
@@ -12,6 +23,9 @@ export const EVENTS: EventDef[] = [
       { name: "戦地救急フェーズ", days: 2, kind: "active", note: "日月" },
       { name: "空白期間", days: 18, kind: "blank" },
     ],
+    links: [
+      { label: "コピペ用リンク", url: "https://discord.com/channels/1406638228420694168/1406655210503540898/1424328488147615797" }
+    ]
   },
   {
     category: "週間イベント",
@@ -21,6 +35,9 @@ export const EVENTS: EventDef[] = [
       { name: "イベントフェーズ", days: 7, kind: "active", note: "月〜日" },
       { name: "空白期間", days: 21, kind: "blank" },
     ],
+    links: [
+      { label: "コピペ用リンク", url: "https://discord.com/channels/1406638228420694168/1406655210503540898/1459983240663273474" }
+    ]
   },
   {
     category: "週間イベント",
@@ -30,6 +47,9 @@ export const EVENTS: EventDef[] = [
       { name: "イベントフェーズ", days: 7, kind: "active", note: "月〜日" },
       { name: "空白期間", days: 21, kind: "blank" },
     ],
+    links: [
+      { label: "コピペ用リンク", url: "https://discord.com/channels/1406638228420694168/1406655210503540898/1459983463607173444" }
+    ]
   },
   {
     category: "週間イベント",
@@ -132,6 +152,9 @@ export const EVENTS: EventDef[] = [
       { name: "イベントフェーズ", days: 2, kind: "active", note: "金〜土" },
       { name: "空白期間", days: 26, kind: "blank" },
     ],
+    links: [
+      { label: "コピペ用リンク", url: "https://discord.com/channels/1406638228420694168/1407031010071154820/1407031010071154820" }
+    ],
     previous_remind: true,
   },
 
@@ -155,6 +178,9 @@ export const EVENTS: EventDef[] = [
       { name: "第2イベントフェーズ", days: 1, kind: "active", note: "木" },
       { name: "空白期間", days: 11, kind: "blank" },
     ],
+    links: [
+      { label: "コピペ用リンク", url: "https://discord.com/channels/1406638228420694168/1407032934598312016/1407032934598312016" }
+    ]
   },
 
   {
@@ -201,6 +227,9 @@ export const EVENTS: EventDef[] = [
       { name: "イベントフェーズ", days: 3, kind: "active", note: "月〜水" },
       { name: "休憩フェーズ", days: 11, kind: "rest" },
     ],
+    links: [
+      { label: "コピペ用リンク", url: "https://discord.com/channels/1406638228420694168/1407034324016037928/1407034324016037928" }
+    ],
     previous_remind: true,
   },
   {
@@ -221,6 +250,9 @@ export const EVENTS: EventDef[] = [
       { name: "イベントフェーズ", days: 3, kind: "active", note: "土〜月" },
       { name: "休憩フェーズ", days: 18, kind: "rest" },
     ],
+    links: [
+      { label: "コピペ用リンク", url: "https://discord.com/channels/1406638228420694168/1407033532525711460/1407033532525711460" }
+    ]
   },
 
   {
