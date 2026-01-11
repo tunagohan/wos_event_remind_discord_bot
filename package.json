@@ -17,9 +17,9 @@
   "description": "Whiteout Survival 2843 Event Remind Discord Bot",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "deploy": "tsx src/deploy.ts",
-    "start": "tsx src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
