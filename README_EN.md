@@ -252,6 +252,3 @@ URLs are wrapped with `<...>` to suppress previews and keep them easy to copy/pa
 
 * Almost always channel permission overrides.
 * Ensure the bot (or its role) explicitly has permission to view and send messages in the target channel.
-
-```
-```
