@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { Client, GatewayIntentBits, Interaction } from "discord.js";
 import { setupDailyPost } from "./daily_post.js";
+import { handleWosPing, handleWosRally } from "./rally.js";
 
 import { EVENTS } from "./events.js";
 import {
@@ -52,30 +53,60 @@ function buildReply(dateISO: string, opts?: { includeDayBeforeReminder?: boolean
 
 client.on("interactionCreate", async (interaction: Interaction) => {
   if (!interaction.isChatInputCommand()) return;
-  if (interaction.commandName !== "wos_event") return;
 
-  const sub = interaction.options.getSubcommand();
-  let daysOffset = 0;
+  try {
+    // --- /wos_event (today/add) ---
+    if (interaction.commandName === "wos_event") {
+      const sub = interaction.options.getSubcommand();
+      let daysOffset = 0;
 
-  if (sub === "today") {
-    daysOffset = 0;
-  } else if (sub === "add") {
-    daysOffset = interaction.options.getInteger("days", true);
-  } else {
-    await interaction.reply({ content: "不明なサブコマンドです。", ephemeral: true });
+      if (sub === "today") {
+        daysOffset = 0;
+      } else if (sub === "add") {
+        daysOffset = interaction.options.getInteger("days", true);
+      } else {
+        await interaction.reply({ content: "不明なサブコマンドです。", ephemeral: true });
+        return;
+      }
+
+      const dateISO = resolveDateISO(daysOffset);
+
+      // today のときだけ前日注意リマインダーを含める（add は通常含めない）
+      const includeDayBeforeReminder = sub === "today";
+      const text = buildReply(dateISO, { includeDayBeforeReminder });
+
+      await interaction.reply({ content: text, ephemeral: false });
+      return;
+    }
+
+    // --- /wos_ping ---
+    if (interaction.commandName === "wos_ping") {
+      await handleWosPing(interaction);
+      return;
+    }
+
+    // --- /wos_attack (連撃スケジューラ) ---
+    if (interaction.commandName === "wos_attack") {
+      await handleWosRally(interaction);
+      return;
+    }
+
+    // unknown command
     return;
+  } catch (e) {
+    console.error("[interactionCreate][error]", e);
+
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!interaction.isRepliable()) return;
+
+    if (interaction.deferred || interaction.replied) {
+      await interaction.editReply(`エラー: ${msg}`);
+    } else {
+      await interaction.reply({ content: `エラー: ${msg}`, ephemeral: true });
+    }
   }
-
-  const dateISO = resolveDateISO(daysOffset);
-
-  // today のときだけ前日リマインダー込み
-  const text =
-    sub === "today"
-      ? buildReply(dateISO, { includeDayBeforeReminder: true })
-      : buildReply(dateISO);
-
-  await interaction.reply({ content: text, ephemeral: false });
 });
+
 
 client.once("ready", () => {
   console.log(`Logged in as ${client.user?.tag}`);

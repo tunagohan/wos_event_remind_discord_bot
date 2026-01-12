@@ -19,3 +19,17 @@ export const wosEventCommand = new SlashCommandBuilder()
           .setMaxValue(365)
       )
   );
+
+export const wosPingCommand = new SlashCommandBuilder()
+  .setName("wos_ping")
+  .setDescription("疎通確認（UTC時刻を返す）");
+
+export const wosAttackCommand = new SlashCommandBuilder()
+  .setName("wos_attack")
+  .setDescription("ホワイトアウトサバイバル 連撃スケジューラ (UTC)")
+  .addStringOption((opt) =>
+    opt
+      .setName("text")
+      .setDescription("例: ねく32 アスナ32 みるく34 兄貴31 のび34 5秒")
+      .setRequired(true)
+  );

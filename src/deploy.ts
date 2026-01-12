@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { REST, Routes } from "discord.js";
-import { wosEventCommand } from "./commands.js";
+import { wosAttackCommand, wosEventCommand, wosPingCommand } from "./commands.js";
 
 const token = process.env.DISCORD_TOKEN;
 const appId = process.env.DISCORD_APP_ID;
@@ -14,7 +14,11 @@ const rest = new REST({ version: "10" }).setToken(token);
 
 async function main() {
   await rest.put(Routes.applicationGuildCommands(appId!, guildId!), {
-    body: [wosEventCommand.toJSON()],
+    body: [
+      wosEventCommand.toJSON(),
+      wosPingCommand.toJSON(),
+      wosAttackCommand.toJSON(),
+    ],
   });
 
   console.log("Guild commands deployed.");
