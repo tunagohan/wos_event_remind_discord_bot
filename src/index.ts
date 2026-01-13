@@ -5,6 +5,7 @@ import { handleWosPing, handleWosRally } from "./rally.js";
 
 import { EVENTS } from "./events.js";
 import {
+  nextEventStartISO,
   eventsOnDateActiveOnly,
   formatBullets,
   resolveDateISO,
@@ -52,30 +53,80 @@ function buildReply(dateISO: string, opts?: { includeDayBeforeReminder?: boolean
 }
 
 client.on("interactionCreate", async (interaction: Interaction) => {
+  // --- Autocomplete: /wos_event next event ---
+  if (interaction.isAutocomplete()) {
+    if (interaction.commandName !== "wos_event") return;
+
+    const sub = interaction.options.getSubcommand();
+    if (sub !== "next") return;
+
+    const focused = interaction.options.getFocused(true);
+    if (focused.name !== "event") return;
+
+    const q = String(focused.value ?? "").trim();
+
+    // Discord の制限: choices は最大 25 件
+    const choices = EVENTS
+      .filter((e) => (q === "" ? true : e.name.includes(q)))
+      .slice(0, 25)
+      .map((e) => ({
+        name: `${e.name}（${e.category}）`,
+        value: e.name,
+      }));
+
+    await interaction.respond(choices);
+    return;
+  }
+
+  // --- Chat Input Commands ---
   if (!interaction.isChatInputCommand()) return;
 
   try {
-    // --- /wos_event (today/add) ---
+    // --- /wos_event (today/add/next) ---
     if (interaction.commandName === "wos_event") {
       const sub = interaction.options.getSubcommand();
-      let daysOffset = 0;
 
-      if (sub === "today") {
-        daysOffset = 0;
-      } else if (sub === "add") {
-        daysOffset = interaction.options.getInteger("days", true);
-      } else {
-        await interaction.reply({ content: "不明なサブコマンドです。", ephemeral: true });
+      if (sub === "today" || sub === "add") {
+        let daysOffset = 0;
+
+        if (sub === "today") {
+          daysOffset = 0;
+        } else {
+          daysOffset = interaction.options.getInteger("days", true);
+        }
+
+        const dateISO = resolveDateISO(daysOffset);
+
+        // today のときだけ前日注意リマインダーを含める（add は通常含めない）
+        const includeDayBeforeReminder = sub === "today";
+        const text = buildReply(dateISO, { includeDayBeforeReminder });
+
+        await interaction.reply({ content: text, ephemeral: false });
         return;
       }
 
-      const dateISO = resolveDateISO(daysOffset);
+      // --- /wos_event next event ---
+      if (sub === "next") {
+        const eventName = interaction.options.getString("event", true);
+        const event = EVENTS.find((e) => e.name === eventName);
 
-      // today のときだけ前日注意リマインダーを含める（add は通常含めない）
-      const includeDayBeforeReminder = sub === "today";
-      const text = buildReply(dateISO, { includeDayBeforeReminder });
+        if (!event) {
+          await interaction.reply({ content: `イベントが見つかりません: ${eventName}`, ephemeral: true });
+          return;
+        }
 
-      await interaction.reply({ content: text, ephemeral: false });
+        // 今日以降で次の開始日（今日が開始日なら今日）
+        const todayISO = resolveDateISO(0);
+        const nextISO = nextEventStartISO(event, todayISO, plusDaysISO);
+
+        await interaction.reply({
+          content: `次の「${event.name}」開始日: ${formatDateJP(nextISO)}`,
+          ephemeral: false,
+        });
+        return;
+      }
+
+      await interaction.reply({ content: "不明なサブコマンドです。", ephemeral: true });
       return;
     }
 

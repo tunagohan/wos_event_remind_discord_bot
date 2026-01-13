@@ -18,6 +18,18 @@ export const wosEventCommand = new SlashCommandBuilder()
           .setMinValue(0)
           .setMaxValue(365)
       )
+  )
+  .addSubcommand((sub) =>
+    sub
+      .setName("next")
+      .setDescription("指定イベントの次回開始日を表示")
+      .addStringOption((opt) =>
+        opt
+          .setName("event")
+          .setDescription("イベント名（候補から選択）")
+          .setRequired(true)
+          .setAutocomplete(true)
+      )
   );
 
 export const wosPingCommand = new SlashCommandBuilder()

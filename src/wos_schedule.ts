@@ -145,3 +145,37 @@ export function plusDaysISO(baseISO: string, days: number): string {
 export function formatDateJP(dateISO: string): string {
   return DateTime.fromISO(dateISO, { zone: ZONE }).toFormat("yyyy/LL/dd");
 }
+
+
+function toUtcMs(isoDate: string): number {
+  // 例: "2025-10-04" -> UTC 00:00 として扱う（date-onlyの差分計算が安定）
+  return Date.parse(`${isoDate}T00:00:00Z`);
+}
+
+function diffDaysISO(aISO: string, bISO: string): number {
+  const ms = toUtcMs(aISO) - toUtcMs(bISO);
+  return Math.floor(ms / 86_400_000);
+}
+
+/**
+ * 指定イベントの「次回開始日（周期の先頭日）」を返す
+ * - fromISO を含めて検索（fromISO が開始日なら fromISO を返す）
+ * - 周期 = phases.days の合計（rest/blankも含む）
+ */
+export function nextEventStartISO(
+  event: EventDef,
+  fromISO: string,
+  plusDaysISO: (iso: string, days: number) => string
+): string {
+  const cycleDays = event.phases.reduce((sum, p) => sum + p.days, 0);
+  if (cycleDays <= 0) throw new Error(`Invalid cycleDays for event: ${event.name}`);
+
+  // from が基準開始日より前なら、開始日は常に event.start
+  if (toUtcMs(fromISO) <= toUtcMs(event.start)) return event.start;
+
+  const diff = diffDaysISO(fromISO, event.start); // from - start
+  const mod = diff % cycleDays;
+  const offset = mod === 0 ? 0 : cycleDays - mod;
+
+  return plusDaysISO(fromISO, offset);
+}
