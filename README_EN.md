@@ -7,6 +7,7 @@ A Discord bot that calculates Whiteout Survival event schedules from a rule set 
   - `/wos_event today`: Today’s events (JST). Also includes “day-before” alerts for flagged events (`previous_remind`).
   - `/wos_event add <n>`: Events for `n` days from today (JST)
   - `/wos_reminder status|on|off`: Check or toggle all scheduled reminder posts
+  - `/transfer sheets|new|add|check|delete`: Manage the migration spreadsheet
 - Scheduled posts
   - Posts the “today’s event list” every day at **09:00 JST** (includes day-before alerts)
   - Posts “pre-start reminders” every day at **21:30 JST** to a separate channel (e.g., Bear Trap)
@@ -71,6 +72,14 @@ DISCORD_DAILY_CHANNEL_ID=123456789012345678
 
 # 21:30 post destination (pre-start reminders)
 DISCORD_PRESTART_CHANNEL_ID=234567890123456789
+
+# Migration spreadsheet (defaults to the built-in spreadsheet ID)
+TRANSFER_SPREADSHEET_ID=1aBTrWLYX_hBdtNAVJOvmo9Sxeb_kc2OYfaYrZ3il184
+TRANSFER_TEMPLATE_SHEET_NAME=テンプレート
+
+# Service account credentials for Google Sheets API
+GOOGLE_SERVICE_ACCOUNT_EMAIL=service-account@project-id.iam.gserviceaccount.com
+GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 
 ### 3) Register Slash Commands (first time / when command definitions change)
@@ -111,8 +120,40 @@ npm run start
 
   * Disables scheduled reminder posts
   * Intended for members with `Manage Server`
+* `/transfer new <sheet_name>`
+
+  * Copies the template sheet and creates a new sheet
+  * Intended for members with `Manage Server`
+* `/transfer sheets`
+
+  * Lists available sheets except the template sheet
+  * Intended for members with `Manage Server`
+* `/transfer add <sheet_name> <category> <user_name> [user_id] <server_id>`
+
+  * Appends a member row to the target sheet
+  * `category` must be selected from `特別枠` or `普通枠`
+  * `user_id` is optional
+  * Intended for members with `Manage Server`
+* `/transfer check <sheet_name>`
+
+  * Shows counts from `B1/B2` and the registered user list
+  * Intended for members with `Manage Server`
+* `/transfer delete <sheet_name> <user_id>`
+
+  * Deletes the row whose column C matches the user ID
+  * Intended for members with `Manage Server`
 
 ---
+
+## Migration Spreadsheet Integration
+
+This uses the Google Sheets API. Share the spreadsheet with your service account first.
+
+* Default spreadsheet ID: `1aBTrWLYX_hBdtNAVJOvmo9Sxeb_kc2OYfaYrZ3il184`
+* Default template sheet name: `テンプレート`
+* `sheets` lists sheet names except the template
+* `add` determines the last row from actual values in columns `B:D`, so dropdown validation in column `A` does not affect it
+* `check` lists only rows where column `A` is `特別枠` or `普通枠`
 
 ## Scheduled Posts (cron)
 

@@ -7,6 +7,7 @@ Whiteout Survival（ホワイトアウトサバイバル）のイベントを「
   - `/wos_event today` : 今日のイベント（JST）。前日注意リマインダー（`previous_remind`）も表示
   - `/wos_event add <n>` : n日後のイベント（JST）
   - `/wos_reminder status|on|off` : 定期投稿リマインダー全体の状態確認 / ON / OFF
+  - `/transfer sheets|new|add|check|delete` : Google スプレッドシートの移民管理を操作
 - 定期投稿
   - 毎日 **09:00** に「当日イベント一覧」を投稿（前日注意リマインダー込み）
     - イベントリストリマインダー
@@ -73,6 +74,14 @@ DISCORD_DAILY_CHANNEL_ID=123456789012345678
 
 # 21:30 投稿先（開始前リマインダー）
 DISCORD_PRESTART_CHANNEL_ID=234567890123456789
+
+# 移民管理シート（省略時は実装済みの既定シートIDを利用）
+TRANSFER_SPREADSHEET_ID=1aBTrWLYX_hBdtNAVJOvmo9Sxeb_kc2OYfaYrZ3il184
+TRANSFER_TEMPLATE_SHEET_NAME=テンプレート
+
+# Google Sheets API 用のサービスアカウント認証
+GOOGLE_SERVICE_ACCOUNT_EMAIL=service-account@project-id.iam.gserviceaccount.com
+GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 
 ### 3) Slash Command を登録（初回・コマンド定義変更時のみ）
@@ -113,8 +122,40 @@ npm run start
 
   * 定期投稿リマインダーを無効化
   * `サーバーを管理` 権限があるメンバー向け
+* `/transfer new <sheet_name>`
+
+  * `テンプレート` シートをコピーして指定名のシートを作成
+  * `サーバーを管理` 権限があるメンバー向け
+* `/transfer sheets`
+
+  * `テンプレート` を除く利用可能なシート一覧を表示
+  * `サーバーを管理` 権限があるメンバー向け
+* `/transfer add <sheet_name> <category> <user_name> [user_id] <server_id>`
+
+  * 指定シートの末尾にメンバーを追加
+  * `category` は `特別枠` / `普通枠` から選択
+  * `user_id` のみ任意
+  * `サーバーを管理` 権限があるメンバー向け
+* `/transfer check <sheet_name>`
+
+  * B1/B2 の集計値と、登録済みユーザー一覧を表示
+  * `サーバーを管理` 権限があるメンバー向け
+* `/transfer delete <sheet_name> <user_id>`
+
+  * C列のユーザーID一致行を削除
+  * `サーバーを管理` 権限があるメンバー向け
 
 ---
+
+## 移民管理シート連携
+
+Google Sheets API を利用します。対象スプレッドシートをサービスアカウントに共有してください。
+
+* 既定のスプレッドシートIDは `1aBTrWLYX_hBdtNAVJOvmo9Sxeb_kc2OYfaYrZ3il184`
+* 既定のテンプレートシート名は `テンプレート`
+* `sheets` はテンプレートを除くシート名だけを一覧表示します
+* `add` の追加先行は `B:D` の実データだけで末尾判定するため、A列のプルダウン設定は影響しません
+* `check` のユーザー一覧は A列が `特別枠` / `普通枠` の行だけを対象にします
 
 ## 自動投稿（cron）
 
