@@ -12,6 +12,7 @@ import {
   formatDateJP,
   plusDaysISO,
 } from "./wos_schedule.js";
+import { readReminderSettings, updateScheduledPostsEnabled } from "./reminder_settings.js";
 
 const token = process.env.DISCORD_TOKEN;
 if (!token) throw new Error("Missing env: DISCORD_TOKEN");
@@ -142,6 +143,36 @@ client.on("interactionCreate", async (interaction: Interaction) => {
       return;
     }
 
+    // --- /wos_reminder ---
+    if (interaction.commandName === "wos_reminder") {
+      const sub = interaction.options.getSubcommand();
+
+      if (sub === "status") {
+        const settings = await readReminderSettings();
+        const updatedAt = settings.updatedAt ?? "未変更";
+
+        await interaction.reply({
+          content: `定期投稿リマインダー: ${settings.scheduledPostsEnabled ? "ON" : "OFF"}\n最終更新: ${updatedAt}`,
+          ephemeral: true,
+        });
+        return;
+      }
+
+      if (sub === "on" || sub === "off") {
+        const enabled = sub === "on";
+        const settings = await updateScheduledPostsEnabled(enabled);
+
+        await interaction.reply({
+          content: `定期投稿リマインダーを ${settings.scheduledPostsEnabled ? "ON" : "OFF"} にしました。`,
+          ephemeral: true,
+        });
+        return;
+      }
+
+      await interaction.reply({ content: "不明なサブコマンドです。", ephemeral: true });
+      return;
+    }
+
     // unknown command
     return;
   } catch (e) {
@@ -167,11 +198,9 @@ client.once("ready", () => {
 
   if (!dailyChannelId) {
     console.log("DISCORD_DAILY_CHANNEL_ID is not set. Daily post is disabled.");
-    return;
   }
   if (!prestartChannelId) {
     console.log("DISCORD_PRESTART_CHANNEL_ID is not set. Prestart post is disabled.");
-    return;
   }
 
   setupDailyPost({

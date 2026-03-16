@@ -6,6 +6,7 @@ Whiteout Survival（ホワイトアウトサバイバル）のイベントを「
 - Slash Command
   - `/wos_event today` : 今日のイベント（JST）。前日注意リマインダー（`previous_remind`）も表示
   - `/wos_event add <n>` : n日後のイベント（JST）
+  - `/wos_reminder status|on|off` : 定期投稿リマインダー全体の状態確認 / ON / OFF
 - 定期投稿
   - 毎日 **09:00** に「当日イベント一覧」を投稿（前日注意リマインダー込み）
     - イベントリストリマインダー
@@ -100,10 +101,25 @@ npm run start
 * `/wos_event add <n>`
 
   * n日後のイベント一覧（JST）
+* `/wos_reminder status`
+
+  * 定期投稿リマインダーの現在状態を確認
+  * `サーバーを管理` 権限があるメンバー向け
+* `/wos_reminder on`
+
+  * 定期投稿リマインダーを有効化
+  * `サーバーを管理` 権限があるメンバー向け
+* `/wos_reminder off`
+
+  * 定期投稿リマインダーを無効化
+  * `サーバーを管理` 権限があるメンバー向け
 
 ---
 
 ## 自動投稿（cron）
+
+`/wos_reminder off` を実行すると、09:00 投稿と開始前リマインダーの両方が停止します。
+`/wos_reminder on` で再開できます。状態は Bot 再起動後も維持されます。
 
 ### 09:00（JST）当日イベント一覧の投稿
 
