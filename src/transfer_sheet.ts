@@ -93,6 +93,20 @@ async function getSheetInfoByName(sheetName: string): Promise<SheetInfo | null> 
   };
 }
 
+export async function listTransferSheets(): Promise<string[]> {
+  const sheets = await getSheetsClient();
+  const spreadsheetId = getSpreadsheetId();
+  const templateSheetName = getTemplateSheetName();
+  const res = await sheets.spreadsheets.get({
+    spreadsheetId,
+    fields: "sheets.properties.title",
+  });
+
+  return (res.data.sheets ?? [])
+    .map((sheet) => sheet.properties?.title?.trim() ?? "")
+    .filter((title) => title !== "" && title !== templateSheetName);
+}
+
 async function requireSheetInfo(sheetName: string): Promise<SheetInfo> {
   const info = await getSheetInfoByName(sheetName);
   if (!info) throw new Error(`シートが見つかりません: ${sheetName}`);

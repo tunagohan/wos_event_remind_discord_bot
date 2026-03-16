@@ -5,6 +5,7 @@ import {
   deleteTransferMember,
   getTransferSheetSummary,
   isTransferCategory,
+  listTransferSheets,
 } from "./transfer_sheet.js";
 
 const MAX_MESSAGE_LENGTH = 1900;
@@ -60,6 +61,22 @@ function formatTransferSummary(summary: Awaited<ReturnType<typeof getTransferShe
 export async function handleTransfer(interaction: ChatInputCommandInteraction) {
   const sub = interaction.options.getSubcommand();
   await interaction.deferReply({ ephemeral: true });
+
+  if (sub === "sheets") {
+    const sheetNames = await listTransferSheets();
+    const lines = ["シート一覧"];
+
+    if (sheetNames.length === 0) {
+      lines.push("利用可能なシートはありません。");
+    } else {
+      for (const sheetName of sheetNames) {
+        lines.push(`- ${sheetName}`);
+      }
+    }
+
+    await interaction.editReply(lines.join("\n"));
+    return;
+  }
 
   if (sub === "new") {
     const sheetName = interaction.options.getString("sheet_name", true);

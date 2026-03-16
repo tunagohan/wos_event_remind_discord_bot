@@ -66,6 +66,11 @@ export const transferCommand = new SlashCommandBuilder()
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
   .addSubcommand((sub) =>
     sub
+      .setName("sheets")
+      .setDescription("利用可能なシート一覧を表示")
+  )
+  .addSubcommand((sub) =>
+    sub
       .setName("new")
       .setDescription("テンプレートをコピーして新しいシートを作成")
       .addStringOption((opt) =>

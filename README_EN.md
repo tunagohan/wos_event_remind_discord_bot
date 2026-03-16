@@ -7,7 +7,7 @@ A Discord bot that calculates Whiteout Survival event schedules from a rule set 
   - `/wos_event today`: Today’s events (JST). Also includes “day-before” alerts for flagged events (`previous_remind`).
   - `/wos_event add <n>`: Events for `n` days from today (JST)
   - `/wos_reminder status|on|off`: Check or toggle all scheduled reminder posts
-  - `/transfer new|add|check|delete`: Manage the migration spreadsheet
+  - `/transfer sheets|new|add|check|delete`: Manage the migration spreadsheet
 - Scheduled posts
   - Posts the “today’s event list” every day at **09:00 JST** (includes day-before alerts)
   - Posts “pre-start reminders” every day at **21:30 JST** to a separate channel (e.g., Bear Trap)
@@ -124,6 +124,10 @@ npm run start
 
   * Copies the template sheet and creates a new sheet
   * Intended for members with `Manage Server`
+* `/transfer sheets`
+
+  * Lists available sheets except the template sheet
+  * Intended for members with `Manage Server`
 * `/transfer add <sheet_name> <category> <user_name> [user_id] <server_id>`
 
   * Appends a member row to the target sheet
@@ -147,6 +151,7 @@ This uses the Google Sheets API. Share the spreadsheet with your service account
 
 * Default spreadsheet ID: `1aBTrWLYX_hBdtNAVJOvmo9Sxeb_kc2OYfaYrZ3il184`
 * Default template sheet name: `テンプレート`
+* `sheets` lists sheet names except the template
 * `add` determines the last row from actual values in columns `B:D`, so dropdown validation in column `A` does not affect it
 * `check` lists only rows where column `A` is `特別枠` or `普通枠`
 
