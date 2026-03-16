@@ -10,6 +10,20 @@ import {
 
 const MAX_MESSAGE_LENGTH = 1900;
 
+function getAllowedTransferChannelIds(): string[] {
+  return (process.env.TRANSFER_ALLOWED_CHANNEL_IDS ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter((id) => id !== "");
+}
+
+function isTransferChannelAllowed(channelId: string | null): boolean {
+  const allowedChannelIds = getAllowedTransferChannelIds();
+  if (allowedChannelIds.length === 0) return true;
+  if (!channelId) return false;
+  return allowedChannelIds.includes(channelId);
+}
+
 function splitMessage(text: string): string[] {
   if (text.length <= MAX_MESSAGE_LENGTH) return [text];
 
@@ -59,6 +73,20 @@ function formatTransferSummary(summary: Awaited<ReturnType<typeof getTransferShe
 }
 
 export async function handleTransfer(interaction: ChatInputCommandInteraction) {
+  if (!isTransferChannelAllowed(interaction.channelId)) {
+    const allowedChannelIds = getAllowedTransferChannelIds();
+    const channels = allowedChannelIds.map((id) => `<#${id}>`).join(", ");
+
+    await interaction.reply({
+      content:
+        allowedChannelIds.length === 0
+          ? "このチャンネルでは /transfer を実行できません。"
+          : `/transfer は次のチャンネルでのみ実行できます: ${channels}`,
+      ephemeral: true,
+    });
+    return;
+  }
+
   const sub = interaction.options.getSubcommand();
   await interaction.deferReply();
 
