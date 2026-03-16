@@ -80,6 +80,9 @@ TRANSFER_TEMPLATE_SHEET_NAME=テンプレート
 # Service account credentials for Google Sheets API
 GOOGLE_SERVICE_ACCOUNT_EMAIL=service-account@project-id.iam.gserviceaccount.com
 GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+
+# Channel IDs allowed to run /transfer (comma-separated)
+TRANSFER_ALLOWED_CHANNEL_IDS=123456789012345678,234567890123456789
 ```
 
 ### 3) Register Slash Commands (first time / when command definitions change)
@@ -151,6 +154,7 @@ This uses the Google Sheets API. Share the spreadsheet with your service account
 
 * Default spreadsheet ID: `1aBTrWLYX_hBdtNAVJOvmo9Sxeb_kc2OYfaYrZ3il184`
 * Default template sheet name: `テンプレート`
+* If `TRANSFER_ALLOWED_CHANNEL_IDS` is set, `/transfer` can run only in those channels
 * `sheets` lists sheet names except the template
 * `add` determines the last row from actual values in columns `B:D`, so dropdown validation in column `A` does not affect it
 * `check` lists only rows where column `A` is `特別枠` or `普通枠`
