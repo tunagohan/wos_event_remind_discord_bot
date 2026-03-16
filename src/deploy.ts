@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { REST, Routes } from "discord.js";
-import { wosAttackCommand, wosEventCommand, wosPingCommand } from "./commands.js";
+import { wosAttackCommand, wosEventCommand, wosPingCommand, wosReminderCommand } from "./commands.js";
 
 const token = process.env.DISCORD_TOKEN;
 const appId = process.env.DISCORD_APP_ID;
@@ -18,6 +18,7 @@ async function main() {
       wosEventCommand.toJSON(),
       wosPingCommand.toJSON(),
       wosAttackCommand.toJSON(),
+      wosReminderCommand.toJSON(),
     ],
   });
 

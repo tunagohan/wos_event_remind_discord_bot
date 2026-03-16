@@ -6,6 +6,7 @@ A Discord bot that calculates Whiteout Survival event schedules from a rule set 
 - Slash Commands
   - `/wos_event today`: Today’s events (JST). Also includes “day-before” alerts for flagged events (`previous_remind`).
   - `/wos_event add <n>`: Events for `n` days from today (JST)
+  - `/wos_reminder status|on|off`: Check or toggle all scheduled reminder posts
 - Scheduled posts
   - Posts the “today’s event list” every day at **09:00 JST** (includes day-before alerts)
   - Posts “pre-start reminders” every day at **21:30 JST** to a separate channel (e.g., Bear Trap)
@@ -98,10 +99,25 @@ npm run start
 * `/wos_event add <n>`
 
   * Event list for `n` days from now (JST)
+* `/wos_reminder status`
+
+  * Shows whether scheduled reminder posts are enabled
+  * Intended for members with `Manage Server`
+* `/wos_reminder on`
+
+  * Enables scheduled reminder posts
+  * Intended for members with `Manage Server`
+* `/wos_reminder off`
+
+  * Disables scheduled reminder posts
+  * Intended for members with `Manage Server`
 
 ---
 
 ## Scheduled Posts (cron)
+
+Running `/wos_reminder off` stops both the 09:00 daily post and the pre-start reminders.
+Running `/wos_reminder on` resumes them, and the setting persists across bot restarts.
 
 ### 09:00 JST — Daily “Today’s Events” post
 

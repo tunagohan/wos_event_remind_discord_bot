@@ -2,6 +2,7 @@ import cron from "node-cron";
 import type { Client } from "discord.js";
 import { eventsOnDateActiveOnly, formatDateJP, resolveDateISO } from "./wos_schedule.js";
 import type { EventDef, Hit } from "./wos_schedule.js";
+import { isScheduledPostsEnabled } from "./reminder_settings.js";
 
 function isSendableTextChannel(
   ch: unknown
@@ -69,8 +70,8 @@ export function setupDailyPost(params: {
   client: Client;
 
   // 投稿先を分離
-  dailyChannelId: string; // 09:00
-  prestartChannelId: string; // 開始前（時刻は events から動的）
+  dailyChannelId?: string; // 09:00
+  prestartChannelId?: string; // 開始前（時刻は events から動的）
 
   events: EventDef[];
   eventByName: Map<string, EventDef>;
@@ -78,56 +79,73 @@ export function setupDailyPost(params: {
 }) {
   const { client, dailyChannelId, prestartChannelId, events, eventByName, buildReply } = params;
 
-  // 09:00 JST（当日一覧）
-  cron.schedule(
-    "0 0 9 * * *",
-    async () => {
-      try {
-        const dateISO = resolveDateISO(0);
-        const text = buildReply(dateISO, { includeDayBeforeReminder: true });
-        await sendToChannel(client, dailyChannelId, text);
-        console.log("Daily post sent:", dateISO);
-      } catch (e) {
-        console.error("Daily post failed:", e);
-      }
-    },
-    { timezone: "Asia/Tokyo" }
-  );
+  if (dailyChannelId) {
+    // 09:00 JST（当日一覧）
+    cron.schedule(
+      "0 0 9 * * *",
+      async () => {
+        try {
+          if (!(await isScheduledPostsEnabled())) {
+            console.log("Daily post skipped: scheduled posts are disabled.");
+            return;
+          }
+
+          const dateISO = resolveDateISO(0);
+          const text = buildReply(dateISO, { includeDayBeforeReminder: true });
+          await sendToChannel(client, dailyChannelId, text);
+          console.log("Daily post sent:", dateISO);
+        } catch (e) {
+          console.error("Daily post failed:", e);
+        }
+      },
+      { timezone: "Asia/Tokyo" }
+    );
+  }
 
   // 開始前リマインド（events.ts の prestart_remind_time から動的生成）
   const times = Array.from(
     new Set(events.map((e) => e.prestart_remind_time).filter((t): t is string => !!t))
   );
 
-  for (const hhmm of times) {
-    const { hour, minute } = parseHHmm(hhmm);
-    const expr = `0 ${minute} ${hour} * * *`; // 秒 分 時 日 月 曜日
+  if (prestartChannelId) {
+    for (const hhmm of times) {
+      const { hour, minute } = parseHHmm(hhmm);
+      const expr = `0 ${minute} ${hour} * * *`; // 秒 分 時 日 月 曜日
 
-    cron.schedule(
-      expr,
-      async () => {
-        try {
-          const dateISO = resolveDateISO(0);
-          const hits = eventsOnDateActiveOnly(events, dateISO);
+      cron.schedule(
+        expr,
+        async () => {
+          try {
+            if (!(await isScheduledPostsEnabled())) {
+              console.log("Prestart post skipped: scheduled posts are disabled.");
+              return;
+            }
 
-          const target = hits
-            .filter((h) => h.phaseDay === 1)
-            .filter((h) => eventByName.get(h.name)?.prestart_remind_time === hhmm);
+            const dateISO = resolveDateISO(0);
+            const hits = eventsOnDateActiveOnly(events, dateISO);
 
-          if (target.length === 0) return;
+            const target = hits
+              .filter((h) => h.phaseDay === 1)
+              .filter((h) => eventByName.get(h.name)?.prestart_remind_time === hhmm);
 
-          const text = buildPrestartText(dateISO, hhmm, target, eventByName);
-          await sendToChannel(client, prestartChannelId, text);
-          console.log("Prestart post sent:", dateISO, hhmm);
-        } catch (e) {
-          console.error("Prestart post failed:", hhmm, e);
-        }
-      },
-      { timezone: "Asia/Tokyo" }
-    );
+            if (target.length === 0) return;
 
-    console.log("Prestart scheduler registered:", hhmm, "->", expr);
+            const text = buildPrestartText(dateISO, hhmm, target, eventByName);
+            await sendToChannel(client, prestartChannelId, text);
+            console.log("Prestart post sent:", dateISO, hhmm);
+          } catch (e) {
+            console.error("Prestart post failed:", hhmm, e);
+          }
+        },
+        { timezone: "Asia/Tokyo" }
+      );
+
+      console.log("Prestart scheduler registered:", hhmm, "->", expr);
+    }
   }
 
-  console.log("Schedulers registered: 09:00 daily + dynamic prestart times (JST).");
+  console.log("Schedulers registered:", {
+    daily: Boolean(dailyChannelId),
+    prestart: Boolean(prestartChannelId),
+  });
 }

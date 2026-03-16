@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 
 export const wosEventCommand = new SlashCommandBuilder()
   .setName("wos_event")
@@ -44,4 +44,18 @@ export const wosAttackCommand = new SlashCommandBuilder()
       .setName("text")
       .setDescription("例: ねく32 アスナ32 みるく34 兄貴31 のび34 5秒")
       .setRequired(true)
+  );
+
+export const wosReminderCommand = new SlashCommandBuilder()
+  .setName("wos_reminder")
+  .setDescription("定期投稿リマインダーのON/OFFを切り替える")
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+  .addSubcommand((sub) =>
+    sub.setName("status").setDescription("定期投稿リマインダーの状態を確認")
+  )
+  .addSubcommand((sub) =>
+    sub.setName("on").setDescription("定期投稿リマインダーを有効化")
+  )
+  .addSubcommand((sub) =>
+    sub.setName("off").setDescription("定期投稿リマインダーを無効化")
   );
