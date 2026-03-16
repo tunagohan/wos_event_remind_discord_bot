@@ -59,3 +59,86 @@ export const wosReminderCommand = new SlashCommandBuilder()
   .addSubcommand((sub) =>
     sub.setName("off").setDescription("定期投稿リマインダーを無効化")
   );
+
+export const transferCommand = new SlashCommandBuilder()
+  .setName("transfer")
+  .setDescription("移民管理シートを操作する")
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+  .addSubcommand((sub) =>
+    sub
+      .setName("new")
+      .setDescription("テンプレートをコピーして新しいシートを作成")
+      .addStringOption((opt) =>
+        opt
+          .setName("sheet_name")
+          .setDescription("作成するシート名")
+          .setRequired(true)
+      )
+  )
+  .addSubcommand((sub) =>
+    sub
+      .setName("add")
+      .setDescription("指定シートにメンバーを追加")
+      .addStringOption((opt) =>
+        opt
+          .setName("sheet_name")
+          .setDescription("対象のシート名")
+          .setRequired(true)
+      )
+      .addStringOption((opt) =>
+        opt
+          .setName("category")
+          .setDescription("ジャンル")
+          .setRequired(true)
+          .addChoices(
+            { name: "特別枠", value: "特別枠" },
+            { name: "普通枠", value: "普通枠" }
+          )
+      )
+      .addStringOption((opt) =>
+        opt
+          .setName("user_name")
+          .setDescription("ユーザー名")
+          .setRequired(true)
+      )
+      .addStringOption((opt) =>
+        opt
+          .setName("user_id")
+          .setDescription("ユーザーID")
+          .setRequired(false)
+      )
+      .addStringOption((opt) =>
+        opt
+          .setName("server_id")
+          .setDescription("サーバーID")
+          .setRequired(true)
+      )
+  )
+  .addSubcommand((sub) =>
+    sub
+      .setName("check")
+      .setDescription("指定シートの集計とユーザー一覧を確認")
+      .addStringOption((opt) =>
+        opt
+          .setName("sheet_name")
+          .setDescription("対象のシート名")
+          .setRequired(true)
+      )
+  )
+  .addSubcommand((sub) =>
+    sub
+      .setName("delete")
+      .setDescription("ユーザーIDで指定シートのメンバーを削除")
+      .addStringOption((opt) =>
+        opt
+          .setName("sheet_name")
+          .setDescription("対象のシート名")
+          .setRequired(true)
+      )
+      .addStringOption((opt) =>
+        opt
+          .setName("user_id")
+          .setDescription("削除対象のユーザーID")
+          .setRequired(true)
+      )
+  );

@@ -2,6 +2,7 @@ import "dotenv/config";
 import { Client, GatewayIntentBits, Interaction } from "discord.js";
 import { setupDailyPost } from "./daily_post.js";
 import { handleWosPing, handleWosRally } from "./rally.js";
+import { handleTransfer } from "./transfer.js";
 
 import { EVENTS } from "./events.js";
 import {
@@ -170,6 +171,12 @@ client.on("interactionCreate", async (interaction: Interaction) => {
       }
 
       await interaction.reply({ content: "不明なサブコマンドです。", ephemeral: true });
+      return;
+    }
+
+    // --- /transfer ---
+    if (interaction.commandName === "transfer") {
+      await handleTransfer(interaction);
       return;
     }
 
