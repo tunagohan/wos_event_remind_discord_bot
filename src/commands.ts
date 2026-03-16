@@ -108,15 +108,15 @@ export const transferCommand = new SlashCommandBuilder()
       )
       .addStringOption((opt) =>
         opt
-          .setName("user_id")
-          .setDescription("ユーザーID")
-          .setRequired(false)
-      )
-      .addStringOption((opt) =>
-        opt
           .setName("server_id")
           .setDescription("サーバーID")
           .setRequired(true)
+      )
+      .addStringOption((opt) =>
+        opt
+          .setName("user_id")
+          .setDescription("ユーザーID")
+          .setRequired(false)
       )
   )
   .addSubcommand((sub) =>
