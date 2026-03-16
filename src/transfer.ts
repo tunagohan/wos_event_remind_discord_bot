@@ -35,7 +35,7 @@ async function replyWithChunks(interaction: ChatInputCommandInteraction, text: s
   await interaction.editReply(chunks[0] ?? "");
 
   for (let i = 1; i < chunks.length; i += 1) {
-    await interaction.followUp({ content: chunks[i], ephemeral: true });
+    await interaction.followUp({ content: chunks[i] });
   }
 }
 
@@ -60,7 +60,7 @@ function formatTransferSummary(summary: Awaited<ReturnType<typeof getTransferShe
 
 export async function handleTransfer(interaction: ChatInputCommandInteraction) {
   const sub = interaction.options.getSubcommand();
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply();
 
   if (sub === "sheets") {
     const sheetNames = await listTransferSheets();
