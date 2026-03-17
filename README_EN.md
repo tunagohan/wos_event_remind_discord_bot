@@ -131,11 +131,11 @@ npm run start
 
   * Lists available sheets except the template sheet
   * Intended for members with `Manage Server`
-* `/transfer add <sheet_name> <category> <user_name> [user_id] <server_id>`
+* `/transfer add <sheet_name> <category> <user_name> <user_id> <server_id> [note]`
 
   * Appends a member row to the target sheet
   * `category` must be selected from `特別枠` or `普通枠`
-  * `user_id` is optional
+  * Only `note` is optional
   * Intended for members with `Manage Server`
 * `/transfer check <sheet_name>`
 
@@ -157,6 +157,7 @@ This uses the Google Sheets API. Share the spreadsheet with your service account
 * If `TRANSFER_ALLOWED_CHANNEL_IDS` is set, `/transfer` can run only in those channels
 * `sheets` lists sheet names except the template
 * `add` determines the last row from actual values in columns `B:D`, so dropdown validation in column `A` does not affect it
+* `add` can also write an optional note to column `E`
 * `check` lists only rows where column `A` is `特別枠` or `普通枠`
 
 ## Scheduled Posts (cron)

@@ -66,7 +66,9 @@ function formatTransferSummary(summary: Awaited<ReturnType<typeof getTransferShe
   }
 
   for (const user of summary.users) {
-    lines.push(`${user.category}, ${user.userName}, ${user.userId || "-"}, ${user.serverId}`);
+    lines.push(
+      `${user.category}, ${user.userName}, ${user.userId || "-"}, ${user.serverId}, ${user.note || "-"}`
+    );
   }
 
   return lines.join("\n");
@@ -117,8 +119,9 @@ export async function handleTransfer(interaction: ChatInputCommandInteraction) {
     const sheetName = interaction.options.getString("sheet_name", true);
     const category = interaction.options.getString("category", true);
     const userName = interaction.options.getString("user_name", true);
-    const userId = interaction.options.getString("user_id") ?? "";
+    const userId = interaction.options.getString("user_id", true);
     const serverId = interaction.options.getString("server_id", true);
+    const note = interaction.options.getString("note") ?? "";
 
     if (!isTransferCategory(category)) {
       throw new Error("不正なジャンルです。");
@@ -130,6 +133,7 @@ export async function handleTransfer(interaction: ChatInputCommandInteraction) {
       userName,
       userId,
       serverId,
+      note,
     });
 
     await interaction.editReply(`シート「${sheetName}」の ${row} 行目にメンバーを追加しました。`);
