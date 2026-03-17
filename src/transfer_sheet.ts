@@ -11,6 +11,7 @@ export type TransferRow = {
   userName: string;
   userId: string;
   serverId: string;
+  note: string;
 };
 
 type SheetInfo = {
@@ -179,11 +180,13 @@ export async function addTransferMember(input: {
   userName: string;
   userId?: string;
   serverId: string;
+  note?: string;
 }): Promise<number> {
   const sheetName = sanitizeSheetName(input.sheetName);
   const userName = input.userName.trim();
   const userId = (input.userId ?? "").trim();
   const serverId = input.serverId.trim();
+  const note = (input.note ?? "").trim();
 
   if (!TRANSFER_CATEGORIES.includes(input.category)) {
     throw new Error("ジャンルは 特別枠 または 普通枠 を指定してください。");
@@ -204,10 +207,10 @@ export async function addTransferMember(input: {
 
   await sheets.spreadsheets.values.update({
     spreadsheetId,
-    range: `'${sheetName}'!A${targetRow}:D${targetRow}`,
+    range: `'${sheetName}'!A${targetRow}:E${targetRow}`,
     valueInputOption: "USER_ENTERED",
     requestBody: {
-      values: [[input.category, userName, userId, serverId]],
+      values: [[input.category, userName, userId, serverId, note]],
     },
   });
 
@@ -231,7 +234,7 @@ export async function getTransferSheetSummary(sheetName: string): Promise<{
     }),
     sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: `'${sanitizedName}'!A:D`,
+      range: `'${sanitizedName}'!A:E`,
     }),
   ]);
 
@@ -247,6 +250,7 @@ export async function getTransferSheetSummary(sheetName: string): Promise<{
       userName: row[1] ?? "",
       userId: row[2] ?? "",
       serverId: row[3] ?? "",
+      note: row[4] ?? "",
     });
   }
 
