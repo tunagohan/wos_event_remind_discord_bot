@@ -12,6 +12,7 @@ export type TransferRow = {
   userId: string;
   serverId: string;
   note: string;
+  invited: string;
 };
 
 type SheetInfo = {
@@ -234,7 +235,7 @@ export async function getTransferSheetSummary(sheetName: string): Promise<{
     }),
     sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: `'${sanitizedName}'!A:E`,
+      range: `'${sanitizedName}'!A:F`,
     }),
   ]);
 
@@ -251,6 +252,7 @@ export async function getTransferSheetSummary(sheetName: string): Promise<{
       userId: row[2] ?? "",
       serverId: row[3] ?? "",
       note: row[4] ?? "",
+      invited: row[5] ?? "",
     });
   }
 
@@ -259,6 +261,72 @@ export async function getTransferSheetSummary(sheetName: string): Promise<{
     normalCount: getCell(countValues, 1, 0) || "0",
     users,
   };
+}
+
+export async function markTransferMemberInvited(sheetName: string, userId: string): Promise<number> {
+  const sanitizedName = sanitizeSheetName(sheetName);
+  const normalizedUserId = userId.trim();
+  if (!normalizedUserId) throw new Error("ユーザーIDを入力してください。");
+
+  const sheets = await getSheetsClient();
+  const spreadsheetId = getSpreadsheetId();
+  await requireSheetInfo(sanitizedName);
+
+  const rowsRes = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: `'${sanitizedName}'!C:C`,
+  });
+
+  const values = rowsRes.data.values ?? [];
+  const rowIndex = values.findIndex((row) => (row[0] ?? "").trim() === normalizedUserId);
+  if (rowIndex === -1) {
+    throw new Error(`ユーザーID ${normalizedUserId} は ${sanitizedName} に見つかりませんでした。`);
+  }
+
+  const rowNumber = rowIndex + 1;
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `'${sanitizedName}'!F${rowNumber}`,
+    valueInputOption: "USER_ENTERED",
+    requestBody: {
+      values: [["◯"]],
+    },
+  });
+
+  return rowNumber;
+}
+
+export async function listUninvitedTransferMembers(sheetName: string): Promise<TransferRow[]> {
+  const sanitizedName = sanitizeSheetName(sheetName);
+  const sheets = await getSheetsClient();
+  const spreadsheetId = getSpreadsheetId();
+  await requireSheetInfo(sanitizedName);
+
+  const rowsRes = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: `'${sanitizedName}'!A:F`,
+  });
+
+  const users: TransferRow[] = [];
+
+  for (const row of rowsRes.data.values ?? []) {
+    const category = row[0]?.trim();
+    if (category !== "特別枠" && category !== "普通枠") continue;
+
+    const invited = (row[5] ?? "").trim();
+    if (invited !== "") continue;
+
+    users.push({
+      category,
+      userName: row[1] ?? "",
+      userId: row[2] ?? "",
+      serverId: row[3] ?? "",
+      note: row[4] ?? "",
+      invited,
+    });
+  }
+
+  return users;
 }
 
 export async function deleteTransferMember(sheetName: string, userId: string): Promise<number> {

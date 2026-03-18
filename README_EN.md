@@ -141,6 +141,14 @@ npm run start
 
   * Shows counts from `B1/B2` and the registered user list
   * Intended for members with `Manage Server`
+* `/transfer invited <sheet_name> <user_id>`
+
+  * Writes `◯` into column `F` for the row matching the user ID in column `C`
+  * Intended for members with `Manage Server`
+* `/transfer uninvited <sheet_name>`
+
+  * Shows users whose column `F` is blank
+  * Intended for members with `Manage Server`
 * `/transfer delete <sheet_name> <user_id>`
 
   * Deletes the row whose column C matches the user ID
@@ -158,7 +166,9 @@ This uses the Google Sheets API. Share the spreadsheet with your service account
 * `sheets` lists sheet names except the template
 * `add` determines the last row from actual values in columns `B:D`, so dropdown validation in column `A` does not affect it
 * `add` can also write an optional note to column `E`
-* `check` lists only rows where column `A` is `特別枠` or `普通枠`
+* `check` lists only rows where column `A` is `特別枠` or `普通枠`, and also shows the invited status from column `F`
+* `invited` writes `◯` into column `F` for the matching user ID row
+* `uninvited` only lists rows whose column `A` is `特別枠` or `普通枠` and whose column `F` is blank
 
 ## Scheduled Posts (cron)
 

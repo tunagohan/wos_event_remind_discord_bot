@@ -5,7 +5,9 @@ import {
   deleteTransferMember,
   getTransferSheetSummary,
   isTransferCategory,
+  listUninvitedTransferMembers,
   listTransferSheets,
+  markTransferMemberInvited,
 } from "./transfer_sheet.js";
 
 const MAX_MESSAGE_LENGTH = 1900;
@@ -66,6 +68,24 @@ function formatTransferSummary(summary: Awaited<ReturnType<typeof getTransferShe
   }
 
   for (const user of summary.users) {
+    lines.push(
+      `${user.category}, ${user.userName}, ${user.userId || "-"}, ${user.serverId}, ${user.note || "-"}, ${user.invited || "-"}`
+    );
+  }
+
+  return lines.join("\n");
+}
+
+function formatUninvitedUsers(users: Awaited<ReturnType<typeof listUninvitedTransferMembers>>): string {
+  const lines: string[] = [];
+  lines.push("未招待ユーザー一覧");
+
+  if (users.length === 0) {
+    lines.push("未招待ユーザーはいません。");
+    return lines.join("\n");
+  }
+
+  for (const user of users) {
     lines.push(
       `${user.category}, ${user.userName}, ${user.userId || "-"}, ${user.serverId}, ${user.note || "-"}`
     );
@@ -144,6 +164,21 @@ export async function handleTransfer(interaction: ChatInputCommandInteraction) {
     const sheetName = interaction.options.getString("sheet_name", true);
     const summary = await getTransferSheetSummary(sheetName);
     await replyWithChunks(interaction, formatTransferSummary(summary));
+    return;
+  }
+
+  if (sub === "invited") {
+    const sheetName = interaction.options.getString("sheet_name", true);
+    const userId = interaction.options.getString("user_id", true);
+    const row = await markTransferMemberInvited(sheetName, userId);
+    await interaction.editReply(`シート「${sheetName}」の ${row} 行目を招待済みに更新しました。`);
+    return;
+  }
+
+  if (sub === "uninvited") {
+    const sheetName = interaction.options.getString("sheet_name", true);
+    const users = await listUninvitedTransferMembers(sheetName);
+    await replyWithChunks(interaction, formatUninvitedUsers(users));
     return;
   }
 

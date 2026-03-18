@@ -138,6 +138,34 @@ export const transferCommand = new SlashCommandBuilder()
   )
   .addSubcommand((sub) =>
     sub
+      .setName("invited")
+      .setDescription("ユーザーIDで指定シートの招待済み状態を更新")
+      .addStringOption((opt) =>
+        opt
+          .setName("sheet_name")
+          .setDescription("対象のシート名")
+          .setRequired(true)
+      )
+      .addStringOption((opt) =>
+        opt
+          .setName("user_id")
+          .setDescription("招待済みにするユーザーID")
+          .setRequired(true)
+      )
+  )
+  .addSubcommand((sub) =>
+    sub
+      .setName("uninvited")
+      .setDescription("指定シートの未招待ユーザー一覧を表示")
+      .addStringOption((opt) =>
+        opt
+          .setName("sheet_name")
+          .setDescription("対象のシート名")
+          .setRequired(true)
+      )
+  )
+  .addSubcommand((sub) =>
+    sub
       .setName("delete")
       .setDescription("ユーザーIDで指定シートのメンバーを削除")
       .addStringOption((opt) =>
